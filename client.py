@@ -1,6 +1,7 @@
 import socket
 import pickle
 import subprocess
+import platform
 
 CLOSE_SOCKET_MSG = "!CLOSE_SOCKET!"
 
@@ -35,11 +36,16 @@ def receivePdf(fileName, clientSocket):
             break
         pdfData += data
 
-    with open("tets.pdf", "wb") as pdf_file:
+    with open(fileName, "wb") as pdf_file:
         pdf_file.write(pdfData)
 
     print(f"File Received and Saved to {fileName}")
-    subprocess.run(["open", fileName], check=True)
+    
+    system_platform = platform.system()
+    if (system_platform == "Darwin"):  
+        subprocess.run(["open", fileName], check=True)
+    elif (system_platform == "Windows"):
+        subprocess.Popen(["start", fileName], shell=True)
     
 if __name__ == "__main__":
     commandOptions = {1: 'EMILYANDERSON_DentalHistory_11-21-20',
@@ -56,7 +62,7 @@ if __name__ == "__main__":
         messageCommand = commandOptions[command]
 
         clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serverAddress = ('192.168.40.84', 8080)
+        serverAddress = ('172.16.33.137', 8080)
         clientSocket.connect(serverAddress)
 
         if (messageCommand == "emergencySignal"):

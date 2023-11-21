@@ -50,38 +50,15 @@ def handleTCPClient(clientSocket, clientAddress):
             response = f"Emergency Response Has Received Your Request. Responding According to Message: {problemStatement.group(1)}"
             clientSocket.send(response.encode())
             
-
-def handleUDPClient(IP):
-    print("[ACTIVATING UDP SERVICES] UDP Server is starting...")
-    serverUDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    serverUDPSocket.bind((IP, 8081))
-    print(f"[LISTENING] Server is listening on {IP}: 8081\n")
-
-    connected = True
-    while connected:
-        data, clientAddress = serverUDPSocket.recvfrom(1024) 
-        if data == CLOSE_SOCKET_MSG:
-            connected: False
-
-        print(f"Received from {clientAddress}: {data.decode()}") # decode data and print 
-        ack = "Hey, this is the server acknowledging the receipt of your data:" + data.decode() # create an acknowledgement
-        serverUDPSocket.sendto(ack.encode(), clientAddress) # encode the acknowledgement the send back to client 
-
 if __name__ == "__main__":
     print("[ACTIVATING TCP SERVICES] TCP Server is starting...")
     serverTCPSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    IP = "192.168.40.84" # use IP given by network
+    IP = "172.16.33.137" # use IP given by network
     serverAddress = (IP, 8080)
     serverTCPSocket.bind(serverAddress)
     serverTCPSocket.listen(15)
     print(f"[LISTENING] Server is listening on {IP}: 8080\n")
-
-    ###
-    # starts udp server
-    udpThread = threading.Thread(target=handleUDPClient, args=(IP,))
-    udpThread.start()
     
     # starts tcp server
     while True:
