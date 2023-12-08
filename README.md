@@ -17,7 +17,7 @@ This project involves the implementation of TCP socket-based communication betwe
 4. In the `client` terminal select optional services
 
 Here is an Example if Project is Running Successfully.
-![Project Logo](media/sampleTerminal.png)
+<img src="https://github.com/yycorcino/content-aware-socket/blob/media/sampleTerminal.png"/>
 
 ### User Options
 
