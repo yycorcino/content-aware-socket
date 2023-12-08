@@ -7,16 +7,25 @@ import random
 
 CLOSE_SOCKET_MSG = "!CLOSE_SOCKET!"
 
-def handleTCPClient(clientSocket, clientAddress):
-    global STATE
+def downloadFile(path, clientSocket):
+    """
+    handles converting pdf to bytes to send to socket requestor
+    """
 
-    def downloadFile(path):
-        with clientSocket:
-            with open(path, "rb") as pdf_file:
-                    pdf_data = pdf_file.read()
-                    clientSocket.sendall(pdf_data)
+    with clientSocket:
+        with open(path, "rb") as pdf_file:
+            pdf_data = pdf_file.read()
+
+            # verifies that the socket isn't closed
+            if clientSocket.fileno() != -1:
+                clientSocket.sendall(pdf_data) 
                 
         print(f"[{clientAddress}] | File Sent Successfully")
+
+def handleTCPClient(clientSocket, clientAddress):
+    """
+    instance of TCP server to handle TCP client
+    """
 
     print(f"[NEW SOCKET CONNECTION] {clientAddress} connected.")
 
@@ -30,10 +39,10 @@ def handleTCPClient(clientSocket, clientAddress):
 
         if (msg == "EMILYANDERSON_DentalHistory_11-21-20" 
             or msg == "DUSTINSTONE_BankStatement_3-9-16"):
-           downloadFile(f"{msg}.pdf")
+           downloadFile(f"{msg}.pdf", clientSocket)
         elif (msg == "CRAFTING_GUIDE"):
             time.sleep(random.randint(3, 7))
-            downloadFile(f"{msg}.pdf")
+            downloadFile(f"{msg}.pdf", clientSocket)
         elif (msg == "facebookProfile"):
             time.sleep(random.randint(3, 7))
             profile =   {
@@ -54,15 +63,13 @@ if __name__ == "__main__":
     print("[ACTIVATING TCP SERVICES] TCP Server is starting...")
     serverTCPSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    IP = "172.16.33.137" # use IP given by network
-    serverAddress = (IP, 8080)
-    serverTCPSocket.bind(serverAddress)
-    serverTCPSocket.listen(15)
+    IP = "192.168.1.113" # use IP given by network
+    serverTCPSocket.bind((IP, 8080))
+    serverTCPSocket.listen(15) # max 15 clients
     print(f"[LISTENING] Server is listening on {IP}: 8080\n")
     
-    # starts tcp server
+    # starts tcp server on a thread and connect instance of server to a client
     while True:
         clientSocket, clientAddress = serverTCPSocket.accept()
-        thread = threading.Thread(target=handleTCPClient, args=(clientSocket, clientAddress))
-        thread.start()
-        print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
+        threading.Thread(target=handleTCPClient, args=(clientSocket, clientAddress)).start()
+        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
